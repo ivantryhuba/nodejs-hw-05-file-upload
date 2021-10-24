@@ -44,6 +44,7 @@ const registration = async (req, res, next) => {
         name: newUser.name,
         email: newUser.email,
         subscription: newUser.subscription,
+        avatarURL: newUser.avatarURL,
       },
     });
   } catch (error) {

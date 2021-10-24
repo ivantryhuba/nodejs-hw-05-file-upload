@@ -8,5 +8,7 @@ router.post('/signup', registration);
 router.post('/login', loginLimit, login);
 router.post('/logout', guard, logout);
 
+router.patch('/avatar', guard, ()=>{});
+
 router.get('/current', guard, getCurrentUser);
 module.exports = router;
