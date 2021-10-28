@@ -16,9 +16,9 @@ const upload = multer({
   storage: storage,
   limits: { fieldSize: 5000000 },
   fileFilter: (req, file, cb) => {
-    if(file.mimetype.includes('image'){
+    if(file.mimetype.includes('image')){
       return cb(null, true)
-    })
+    }
 
     cb(new CustomError('400', 'Wrong format for avatar'))
   }

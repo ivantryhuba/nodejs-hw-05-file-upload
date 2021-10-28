@@ -1,8 +1,12 @@
 const Users = require('../repository/users');
 const jwt = require('jsonwebtoken');
+// const fs = require ('fs/promises')
+const path = require('path');
+const UploadService = require('../services/fileUpload');
 require('dotenv').config();
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { HttpCode } = require('../config/constants');
+const mkdirp = require('mkdirp');
 
 const {
   OK,
@@ -57,7 +61,7 @@ const registration = async (req, res, next) => {
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   const user = await Users.findByEmail(email);
-  const isValidPassword = await user.isValidPassword(password);
+  const isValidPassword = await user?.isValidPassword(password);
 
   if (!user || !isValidPassword) {
     return res.status(UNAUTHORIZED).json({
@@ -79,6 +83,7 @@ const login = async (req, res, next) => {
     },
   });
 };
+
 const logout = async (req, res, next) => {
   const id = req.user._id;
   await Users.updateToken(id, null);
@@ -90,7 +95,29 @@ const getCurrentUser = async (req, res, next) => {
   return res.status(OK).json({
     status: 'success',
     code: OK,
-    data: {email, subscription},
+    data: { email, subscription },
+  });
+};
+
+const uploadAvatar = async (req, res, next) => {
+  const id = String(req.user._id);
+  const file = req.file;
+  const AVATAR_OF_USERS = process.env.AVATAR_OF_USERS;
+  const destination = path.join(AVATAR_OF_USERS, id);
+  await mkdirp(destination)
+  const uploadService = new UploadService(destination);
+  const avatarURL = await uploadService.save(file, id);
+  await Users.updateAvatar(id, avatarURL);
+  // try {
+  //   await fs.unlink(file.path)
+  // } catch (err) {
+  //   console.log(err.message);
+  // }
+
+  return res.status(OK).json({
+    status: 'success',
+    code: OK,
+    data: { avatarURL },
   });
 };
 
@@ -99,4 +126,5 @@ module.exports = {
   login,
   logout,
   getCurrentUser,
+  uploadAvatar,
 };
